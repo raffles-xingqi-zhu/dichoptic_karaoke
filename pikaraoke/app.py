@@ -84,7 +84,7 @@ socketio.init_app(app)
 def dichoptic_demo():
     return send_from_directory(
         os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-main', 'templates'), 
-        '_index.html'
+        'index.html'
     )
 
 @app.route('/dichoptic-demo/<path:filename>')

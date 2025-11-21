@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Karaoke App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap" rel="stylesheet">
+
+    
+    <title>DiKaro</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: "{{ font_family }}";
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #1a1a1a;
-            color: white;
+            background-color:  {{bg_color}};
+            color: black;
             margin: 0;
         }
         
@@ -36,12 +39,12 @@
         
         #time-display {
             font-size: 18px;
-            color: black;
+            color: {{bg_color}};
         }
     </style>
 </head>
 <body>
-    <h1>🎤 Karaoke</h1>
+    <h1>🎤 Dikaro </h1>
     
     <div id="lyrics-display"></div>
     
@@ -58,6 +61,8 @@
         let currentTime = 0;
         let isPlaying = true; // Auto-start playback
         let startTime = Date.now(); // Initialize timer immediately
+
+        const colours = {{ adjusted_colours | tojson }};
 
         // Load all lyrics data when page loads
         async function loadLyrics() {
@@ -85,14 +90,39 @@
             return ""; // No lyric active
         }
 
-        // Update the display
+        let lastLyric = ""; // Cache last lyric to prevent re-coloring
+
+        function colorLyricText(lyric) {
+            if (!lyric) return "";
+
+            const words = lyric.trim().split(/\s+/);
+
+            // If only one word, show it plain black
+            if (words.length === 1) {
+                return `<span style="color: black">${words[0]}</span>`;
+            }
+
+            // Otherwise, color each word only once
+            return words.map(word => {
+                const randomColor = colours[Math.floor(Math.random() * colours.length)];
+                return `<span style="color: ${randomColor}">${word}</span>`;
+            }).join(" ");
+        }
+
         function updateDisplay() {
             const lyricDisplay = document.getElementById('lyrics-display');
-            const timeDisplay = document.getElementById('time-display');
+            const newLyric = getCurrentLyric(currentTime);
 
-            lyricDisplay.textContent = getCurrentLyric(currentTime);
+            // Only update if lyric has changed
+            if (newLyric !== lastLyric) {
+                lyricDisplay.innerHTML = colorLyricText(newLyric);
+                lastLyric = newLyric;
+            }
+
+            const timeDisplay = document.getElementById('time-display');
             timeDisplay.textContent = `Time: ${currentTime.toFixed(2)}s`;
         }
+
 
         // Animation loop
         function animationLoop() {

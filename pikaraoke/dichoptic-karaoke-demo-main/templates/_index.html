@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Karaoke App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #1a1a1a;
+            color: white;
+            margin: 0;
+        }
+        
+        #lyrics-display {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 50px;
+            text-align: center;
+            min-height: 100px;
+        }
+        
+        /* #controls {
+            margin: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+        } */
+        
+        #time-display {
+            font-size: 18px;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎤 Karaoke</h1>
+    
+    <div id="lyrics-display"></div>
+    
+    <div id="controls">
+        <!-- <button id="start-btn">Start</button>
+        <button id="stop-btn">Stop</button>
+        <button id="reset-btn">Reset</button> -->
+    </div>
+    
+    <div id="time-display">Time: 0.00s</div>
+
+    <script>
+        let lyricsData = [];
+        let currentTime = 0;
+        let isPlaying = true; // Auto-start playback
+        let startTime = Date.now(); // Initialize timer immediately
+
+        // Load all lyrics data when page loads
+        async function loadLyrics() {
+            try {
+                const response = await fetch('/api/lyrics');
+                lyricsData = await response.json();
+                console.log('Loaded lyrics:', lyricsData);
+
+                // Ensure timing starts after lyrics load
+                startTime = Date.now();
+                animationLoop(); // Start animation automatically
+            } catch (error) {
+                console.error('Error loading lyrics:', error);
+            }
+        }
+
+        // Get the lyric for the current time using start/end time
+        function getCurrentLyric(time) {
+            for (let i = 0; i < lyricsData.length; i++) {
+                const [start, end, text] = lyricsData[i];
+                if (time >= start && time <= end) {
+                    return text;
+                }
+            }
+            return ""; // No lyric active
+        }
+
+        // Update the display
+        function updateDisplay() {
+            const lyricDisplay = document.getElementById('lyrics-display');
+            const timeDisplay = document.getElementById('time-display');
+
+            lyricDisplay.textContent = getCurrentLyric(currentTime);
+            timeDisplay.textContent = `Time: ${currentTime.toFixed(2)}s`;
+        }
+
+        // Animation loop
+        function animationLoop() {
+            if (isPlaying) {
+                currentTime = (Date.now() - startTime) / 1000;
+                updateDisplay();
+                requestAnimationFrame(animationLoop);
+            }
+        }
+
+        // Commented out button listeners (not used)
+        /*
+        document.getElementById('start-btn').addEventListener('click', () => {
+            if (!isPlaying) {
+                isPlaying = true;
+                startTime = Date.now() - (currentTime * 1000);
+                animationLoop();
+            }
+        });
+
+        document.getElementById('stop-btn').addEventListener('click', () => {
+            isPlaying = false;
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            isPlaying = false;
+            currentTime = 0;
+            updateDisplay();
+        });
+        */
+
+        // Load lyrics & auto-start
+        loadLyrics();
+    </script>
+
+</body>
+</html>

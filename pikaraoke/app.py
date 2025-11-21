@@ -5,9 +5,10 @@ monkey.patch_all()
 import logging
 import os
 import sys
+import webbrowser
 
 import flask_babel
-from flask import Flask, request, session
+from flask import Flask, request, session, send_from_directory
 from flask_babel import Babel
 from flask_socketio import SocketIO
 
@@ -74,6 +75,28 @@ app.register_blueprint(nowplaying_bp)
 babel.init_app(app)
 socketio.init_app(app)
 
+# Serve dichoptic karaoke demo app
+@app.route('/dichoptic-demo')
+def dichoptic_demo():
+    return send_from_directory(
+        os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-read_csv'), 
+        'index.html'
+    )
+
+@app.route('/dichoptic-demo/<path:filename>')
+def dichoptic_demo_assets(filename):
+    return send_from_directory(
+        os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-read_csv'), 
+        filename
+    )
+
+@app.route('/dichoptic-demo/api/<path:api_path>')
+def dichoptic_demo_api(api_path):
+    return send_from_directory(
+        os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-read_csv'), 
+        f'api/{api_path}'
+    )
+
 
 @babel.localeselector
 def get_locale():
@@ -107,6 +130,13 @@ def end_song(reason):
 def start_song():
     k = get_karaoke_instance()
     k.start_song()
+    # Open dichoptic karaoke demo app when song starts
+    try:
+        demo_url = f"http://localhost:{args.port}/dichoptic-demo"
+        webbrowser.open(demo_url)
+        logging.info(f"Opening dichoptic demo app at {demo_url}")
+    except Exception as e:
+        logging.error(f"Failed to open dichoptic demo app: {e}")
 
 
 @socketio.on("clear_notification")
@@ -169,10 +199,10 @@ def main():
         buffer_size=args.buffer_size,
         hide_url=args.hide_url,
         hide_notifications=args.hide_notifications,
-        hide_splash_screen=args.hide_splash_screen,
+        hide_splash_screen=True,  # Force hide splash screen for dichoptic app
         high_quality=args.high_quality,
         logo_path=args.logo_path,
-        hide_overlay=args.hide_overlay,
+        hide_overlay=True,  # Force hide video overlay for dichoptic app,
         screensaver_timeout=args.screensaver_timeout,
         url=args.url,
         prefer_hostname=args.prefer_hostname,

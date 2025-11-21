@@ -8,7 +8,7 @@ import sys
 import webbrowser
 
 import flask_babel
-from flask import Flask, request, session, send_from_directory
+from flask import Flask, request, session, send_from_directory, jsonify
 from flask_babel import Babel
 from flask_socketio import SocketIO
 
@@ -33,6 +33,10 @@ from pikaraoke.routes.queue import queue_bp
 from pikaraoke.routes.search import search_bp
 from pikaraoke.routes.splash import splash_bp
 from pikaraoke.routes.stream import stream_bp
+
+# Import dichoptic app functions
+sys.path.append(os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-read_csv'))
+from karaoke_functions import read_lyrics_csv
 
 try:
     from urllib.parse import quote
@@ -79,23 +83,29 @@ socketio.init_app(app)
 @app.route('/dichoptic-demo')
 def dichoptic_demo():
     return send_from_directory(
-        os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-read_csv'), 
+        os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-read_csv', 'templates'), 
         'index.html'
     )
 
 @app.route('/dichoptic-demo/<path:filename>')
 def dichoptic_demo_assets(filename):
+    # Handle static assets (CSS, JS, etc.)
     return send_from_directory(
         os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-read_csv'), 
         filename
     )
 
-@app.route('/dichoptic-demo/api/<path:api_path>')
-def dichoptic_demo_api(api_path):
-    return send_from_directory(
-        os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-read_csv'), 
-        f'api/{api_path}'
-    )
+@app.route('/dichoptic-demo/api/lyrics')
+def dichoptic_demo_lyrics():
+    """API endpoint that returns all lyrics data for dichoptic app"""
+    try:
+        lyrics_folder = os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-read_csv', 'song_lyrics')
+        song_filename = "lyrics.csv"
+        lyrics_data = read_lyrics_csv(os.path.join(lyrics_folder, song_filename))
+        return jsonify(lyrics_data)
+    except Exception as e:
+        logging.error(f"Error loading lyrics: {e}")
+        return jsonify([])
 
 
 @babel.localeselector
@@ -202,7 +212,7 @@ def main():
         hide_splash_screen=args.hide_splash_screen,  # Allow splash screen to show QR code
         high_quality=args.high_quality,
         logo_path=args.logo_path,
-        hide_overlay=True,  # Force hide video overlay for dichoptic app,
+        hide_overlay=False,  # Force hide video overlay for dichoptic app,
         screensaver_timeout=args.screensaver_timeout,
         url=args.url,
         prefer_hostname=args.prefer_hostname,

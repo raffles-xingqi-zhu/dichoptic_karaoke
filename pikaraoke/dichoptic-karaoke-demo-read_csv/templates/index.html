@@ -62,7 +62,7 @@
         // Load all lyrics data when page loads
         async function loadLyrics() {
             try {
-                const response = await fetch('/api/lyrics');
+                const response = await fetch('/dichoptic-demo/api/lyrics');
                 lyricsData = await response.json();
                 console.log('Loaded lyrics:', lyricsData);
             } catch (error) {

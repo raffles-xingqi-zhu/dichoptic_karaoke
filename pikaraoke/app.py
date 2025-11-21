@@ -199,7 +199,7 @@ def main():
         buffer_size=args.buffer_size,
         hide_url=args.hide_url,
         hide_notifications=args.hide_notifications,
-        hide_splash_screen=True,  # Force hide splash screen for dichoptic app
+        hide_splash_screen=args.hide_splash_screen,  # Allow splash screen to show QR code
         high_quality=args.high_quality,
         logo_path=args.logo_path,
         hide_overlay=True,  # Force hide video overlay for dichoptic app,

@@ -68,29 +68,29 @@ def build_ffmpeg_cmd(
         # It also appears to have memory issues with hardware acceleration h264_v4l2m2m
         output = ffmpeg.output(
             audio,
-            video,
+            #video,
             fr.output_file,
-            vcodec="libx264",
-            acodec="aac",
+            #vcodec="libx264",
+            acodec="mp3",
             preset="ultrafast",
-            pix_fmt="yuv420p",
+            #pix_fmt="yuv420p",
             listen=1,
-            f="mp4",
-            video_bitrate="500k",
+            f="mp3",
+            #video_bitrate="500k",
             movflags=movflags,
         )
     else:
-        video = input.video
+        #video = input.video
         output = ffmpeg.output(
             audio,
-            video,
+            #video,
             fr.output_file,
-            vcodec=vcodec,
-            acodec=acodec,
+            #vcodec=vcodec,
+            acodec="mp3",
             preset="ultrafast",
             listen=1,
-            f="mp4",
-            video_bitrate=vbitrate,
+            f="mp3",
+            #video_bitrate="500k",
             movflags=movflags,
         )
 

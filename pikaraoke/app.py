@@ -8,7 +8,7 @@ import sys
 import webbrowser
 
 import flask_babel
-from flask import Flask, request, session, send_from_directory, jsonify
+from flask import Flask, request, session, send_from_directory, jsonify, render_template
 from flask_babel import Babel
 from flask_socketio import SocketIO
 
@@ -82,10 +82,43 @@ socketio.init_app(app)
 # Serve dichoptic karaoke demo app
 @app.route('/dichoptic-demo')
 def dichoptic_demo():
-    return send_from_directory(
-        os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-main', 'templates'), 
-        'index.html'
+    # Import dichoptic functions to get the required variables
+    from dichoptic_functions import adjust_color_contrast
+    from jinja2 import Template
+    import json
+    
+    # Configuration variables (same as standalone app)
+    COLOR_1 = '#000000'  # Black
+    COLOR_2 = '#00FFFF'  # Cyan
+    COLOR_3 = '#FF0000'  # Red
+    
+    hex_colours = [COLOR_1, COLOR_2, COLOR_3]
+    contrasts = [1.0, 0.9, 0.6]
+    
+    adjusted_colours = []
+    for i in range(len(hex_colours)):
+        adjusted_colour = adjust_color_contrast(hex_colours[i], contrasts[i])
+        adjusted_colours.append(adjusted_colour)
+        
+    BACKGROUND_COLOR = '#FFFEF7'  # Very light grey 
+    FONT_FAMILY = "Roboto Flex"  # Font
+    FONT_SIZE = '36px'  # Font size
+    
+    # Read the template file and render with Jinja2
+    template_path = os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-main', 'templates', 'index.html')
+    with open(template_path, 'r', encoding='utf-8') as f:
+        template_content = f.read()
+    
+    # Render the template with Jinja2
+    template = Template(template_content)
+    rendered = template.render(
+        adjusted_colours=adjusted_colours,
+        bg_color=BACKGROUND_COLOR,
+        font_family=FONT_FAMILY,
+        font_size=FONT_SIZE
     )
+    
+    return rendered
 
 @app.route('/dichoptic-demo/<path:filename>')
 def dichoptic_demo_assets(filename):

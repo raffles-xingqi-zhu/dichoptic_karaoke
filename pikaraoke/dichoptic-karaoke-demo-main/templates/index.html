@@ -2,22 +2,28 @@
 <html>
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap" rel="stylesheet">
+    <title>Dichoptic Karaoke App</title>
 
-    
-    <title>DiKaro</title>
-    <style>
+    <style>     
         body {
             font-family: "{{ font_family }}";
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;  /* Align content from top */
+            padding-top: 20px;            /* Push content down slightly from top */
             height: 100vh;
-            background-color:  {{bg_color}};
+            background-color: {{ bg_color }};
             color: black;
             margin: 0;
         }
-        
+
+        h1 {
+            font-size: 56px;      /* Bigger title */
+            margin: 0;            /* Remove margin so it hugs the top */
+            padding: 0;           /* Remove padding */
+        }
+
         #lyrics-display {
             font-size: 48px;
             font-weight: bold;
@@ -41,12 +47,31 @@
             font-size: 18px;
             color: {{bg_color}};
         }
+
+        /* Make container fill the remaining viewport */
+        #lyrics-container {
+            display: flex;
+            justify-content: center; /* Horizontal center */
+            align-items: center;     /* Vertical center */
+            flex: 1;                 /* Take remaining space after title */
+            width: 100%;
+        }
+
+        #lyrics-display {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            min-height: 100px;
+        }
+
     </style>
 </head>
 <body>
     <h1>🎤 Dikaro </h1>
     
-    <div id="lyrics-display"></div>
+    <div id="lyrics-container">
+        <div id="lyrics-display"></div>
+    </div>
     
     <div id="controls">
         <!-- <button id="start-btn">Start</button>

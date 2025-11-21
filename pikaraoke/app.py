@@ -35,7 +35,7 @@ from pikaraoke.routes.splash import splash_bp
 from pikaraoke.routes.stream import stream_bp
 
 # Import dichoptic app functions
-sys.path.append(os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-read_csv'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-main'))
 from karaoke_functions import read_lyrics_csv
 
 try:
@@ -83,24 +83,25 @@ socketio.init_app(app)
 @app.route('/dichoptic-demo')
 def dichoptic_demo():
     return send_from_directory(
-        os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-read_csv', 'templates'), 
-        'index.html'
+        os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-main', 'templates'), 
+        '_index.html'
     )
 
 @app.route('/dichoptic-demo/<path:filename>')
 def dichoptic_demo_assets(filename):
     # Handle static assets (CSS, JS, etc.)
     return send_from_directory(
-        os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-read_csv'), 
+        os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-main'), 
         filename
     )
 
 @app.route('/dichoptic-demo/api/lyrics')
+@app.route('/api/lyrics')
 def dichoptic_demo_lyrics():
     """API endpoint that returns all lyrics data for dichoptic app"""
     try:
-        lyrics_folder = os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-read_csv', 'song_lyrics')
-        song_filename = "lyrics.csv"
+        lyrics_folder = os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-main', 'song_lyrics')
+        song_filename = "IReadItThatWay_lyrics.csv"
         lyrics_data = read_lyrics_csv(os.path.join(lyrics_folder, song_filename))
         return jsonify(lyrics_data)
     except Exception as e:

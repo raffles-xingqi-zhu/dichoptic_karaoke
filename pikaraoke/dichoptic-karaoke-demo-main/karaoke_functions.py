@@ -1,5 +1,6 @@
 import pandas as pd
-from typing import List, Tuple
+from typing import List, Tuple, Optional
+from lyricDict import SongNameToLyricsFilePath
 
 def get_song(song_list_filepath: str):
     # load csv
@@ -61,3 +62,35 @@ def get_current_lyric(lyrics_data: List[Tuple[str, float]], current_time: float)
             break
     
     return current_lyric
+
+
+def get_lyrics_filename(song_name: str) -> Optional[str]:
+    """
+    Map a song name to its corresponding lyrics filename using the lyrics dictionary.
+    
+    Args:
+        song_name: The name of the queued song
+        
+    Returns:
+        The filename of the lyrics CSV file, or None if not found
+    """
+    return SongNameToLyricsFilePath.get(song_name)
+
+
+def get_lyrics_for_song(song_name: str, lyrics_folder: str = "./song_lyrics/") -> List[Tuple[float, float, str]]:
+    """
+    Get lyrics data for a specific song by name.
+    
+    Args:
+        song_name: The name of the queued song
+        lyrics_folder: Path to the folder containing lyrics files
+        
+    Returns:
+        List of tuples containing lyrics data, or empty list if not found
+    """
+    lyrics_filename = get_lyrics_filename(song_name)
+    if lyrics_filename:
+        return read_lyrics_csv(lyrics_folder + lyrics_filename)
+    else:
+        print(f"Warning: No lyrics file found for song: {song_name}")
+        return []

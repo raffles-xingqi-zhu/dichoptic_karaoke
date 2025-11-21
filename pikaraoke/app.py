@@ -36,7 +36,8 @@ from pikaraoke.routes.stream import stream_bp
 
 # Import dichoptic app functions
 sys.path.append(os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-main'))
-from karaoke_functions import read_lyrics_csv
+from karaoke_functions import read_lyrics_csv, get_lyrics_for_song
+from lyricDict import SongNameToLyricsFilePath
 
 try:
     from urllib.parse import quote
@@ -133,13 +134,47 @@ def dichoptic_demo_assets(filename):
 def dichoptic_demo_lyrics():
     """API endpoint that returns all lyrics data for dichoptic app"""
     try:
+        k = get_karaoke_instance()
         lyrics_folder = os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-main', 'song_lyrics')
-        song_filename = "IReadItThatWay_lyrics.csv"
+        
+        # Get the currently playing song or next in queue
+        lyrics_data = []
+        song_filename = None
+        
+        # First try to get the currently playing song
+        if k.now_playing_filename:
+            song_title = k.filename_from_path(k.now_playing_filename)
+            lyrics_filename = SongNameToLyricsFilePath.get(song_title)
+            if lyrics_filename:
+                song_filename = lyrics_filename
+                logging.info(f"Loading lyrics for currently playing song: {song_title} -> {lyrics_filename}")
+        
+        # If no current song or no lyrics for current song, try the next in queue
+        if not song_filename and len(k.queue) > 0:
+            queue_song_title = k.queue[0]["title"]
+            lyrics_filename = SongNameToLyricsFilePath.get(queue_song_title)
+            if lyrics_filename:
+                song_filename = lyrics_filename
+                logging.info(f"Loading lyrics for queued song: {queue_song_title} -> {lyrics_filename}")
+        
+        # Fallback to a default song if nothing found
+        if not song_filename:
+            song_filename = "iwantitthatway_ireaditthatway.csv"  # Default fallback
+            logging.warning("No matching lyrics found, using default song")
+        
         lyrics_data = read_lyrics_csv(os.path.join(lyrics_folder, song_filename))
         return jsonify(lyrics_data)
+        
     except Exception as e:
         logging.error(f"Error loading lyrics: {e}")
-        return jsonify([])
+        # Fallback to default song on error
+        try:
+            lyrics_folder = os.path.join(os.path.dirname(__file__), 'dichoptic-karaoke-demo-main', 'song_lyrics')
+            song_filename = "iwantitthatway_ireaditthatway.csv"
+            lyrics_data = read_lyrics_csv(os.path.join(lyrics_folder, song_filename))
+            return jsonify(lyrics_data)
+        except:
+            return jsonify([])
 
 
 @babel.localeselector
